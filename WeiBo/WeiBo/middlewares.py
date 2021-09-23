@@ -12,6 +12,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from scrapy.http import HtmlResponse
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+import time
 
 
 class WeiboSpiderMiddleware:
@@ -119,6 +120,20 @@ class SeleniumMiddleware:
         try:
             self.browser.get(request.url)
             self.wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'm-auto-list')))
+            # 滑动至底部
+            client_hg = scroll_top = 0
+            scroll_hg = 1
+            while round(scroll_top) + round(client_hg) != round(int(scroll_hg)):
+                self.browser.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+                time.sleep(1)
+                js = 'let scroll_top = document.documentElement.scrollTop; return scroll_top;'
+                scroll_top = self.browser.execute_script(js)
+                js = 'let client_hg = document.documentElement.clientHeight; return client_hg;'
+                client_hg = self.browser.execute_script(js)
+                js = 'let scroll_hg = document.body.scrollHeight; return scroll_hg;'
+                scroll_hg = self.browser.execute_script(js)
+                # print(scroll_top, client_hg, scroll_hg)
+
             return HtmlResponse(url=request.url, body=self.browser.page_source, request=request, encoding='utf-8',
                                 status=200)
 
