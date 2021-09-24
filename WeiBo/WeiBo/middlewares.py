@@ -123,9 +123,9 @@ class SeleniumMiddleware:
             # 滑动至底部
             client_hg = scroll_top = 0
             scroll_hg = 1
-            while round(scroll_top) + round(client_hg) != round(int(scroll_hg)):
+            while round(scroll_top) + round(client_hg) < round(int(scroll_hg)):
                 self.browser.execute_script("window.scrollTo(0,document.body.scrollHeight);")
-                time.sleep(1)
+                time.sleep(1.5)
                 js = 'let scroll_top = document.documentElement.scrollTop; return scroll_top;'
                 scroll_top = self.browser.execute_script(js)
                 js = 'let client_hg = document.documentElement.clientHeight; return client_hg;'
