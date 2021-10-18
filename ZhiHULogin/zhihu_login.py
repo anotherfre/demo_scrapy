@@ -14,9 +14,9 @@ def login():
     pwd_login_btn = browser.find_element_by_xpath('//div[@class="SignFlow-tab"]')
     pwd_login_btn.click()
     username_input = browser.find_element_by_xpath('//input[@name="username"]')
-    username_input.send_keys('13015759718')
+    username_input.send_keys(USERNAME)
     pwd_input = browser.find_element_by_xpath('//input[@name="password"]')
-    pwd_input.send_keys('a83604038')
+    pwd_input.send_keys(PASSWORD)
     pwd_input.send_keys(Keys.ENTER)
     print(browser.page_source)
     pass
