@@ -20,7 +20,7 @@ class JiKe:
             user = content.xpath('.//a[@class="sc-bdnxRM fEvjQr"]/text()')[0]
             create_time = content.xpath('.//time/@datetime')[0]
             text = content.xpath(
-                './/div[@class="break-words content_truncate__1z0HR"]/text()')
+                './/div[contains(@class,"break-words content_truncate__1z0HR")]/text()')
             img_pattern = './/div[@class="sc-bdnxRM fzUdiI"]'
             image_url_list = []
             if content.xpath(img_pattern):
@@ -45,12 +45,15 @@ class JiKe:
                         img_src = image.lstrip('url("').rstrip('")')
                         image_url_list.append(img_src)
 
-            item = {'user': user, 'create_time': create_time, 'content': content, 'image_urls': image_url_list}
+            item = {'user': user, 'create_time': create_time, 'text': text, 'image_urls': image_url_list}
             items.append(item)
+        return items
 
 
 if __name__ == '__main__':
     jike = JiKe('https://web.okjike.com/u/5f88ffbd-9595-4de0-9cf5-b3402bf43a0e')
     page = jike.get_page()
-    jike.get_items(page)
-    pass
+    items = jike.get_items(page)
+
+    for item in items:
+        print(item)
