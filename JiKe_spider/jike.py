@@ -1,17 +1,46 @@
 from selenium import webdriver
 from lxml import etree
 import pandas as pd
+import json
 
 
 class JiKe:
     def __init__(self, url):
+
+        # chrome_opt = webdriver.ChromeOptions()
+        # chrome_opt.add_argument("--proxy-server=http://171.92.21.43:9000")
+        # self.browser = webdriver.Chrome(chrome_options=chrome_opt)
         self.browser = webdriver.Chrome()
         self.url = url
 
-    def get_page(self):
+    def get_page(self, save_login_cookies=False, load_login_cookies=False):
         self.browser.get(self.url)
+        if save_login_cookies:
+            self.save_login_cookies()
+        if load_login_cookies:
+            self.load_login_cookies()
         page = self.browser.page_source
         return page
+
+    def save_login_cookies(self):
+        cookies = self.browser.get_cookies()
+        with open('./cookies.json', 'w') as f:
+            f.write(json.dumps(cookies))
+        return True
+
+    def load_login_cookies(self):
+        with open('./cookies.json', 'r')as f:
+            cookies = json.loads(f.read())
+
+        for cookie in cookies:
+            self.browser.add_cookie({
+                'domain': cookie['domain'],
+                'name': cookie['name'],
+                'value': cookie['value'],
+                'path': cookie['path']
+            })
+        self.browser.get(self.url)
+        return True
 
     def get_items(self, page):
         page_etree = etree.HTML(page)
@@ -22,6 +51,8 @@ class JiKe:
             create_time = content.xpath('.//time/@datetime')[0]
             text = content.xpath(
                 './/div[contains(@class,"break-words content_truncate__1z0HR")]/text()')
+            href = content.xpath('.//a[@class="text-primary no-underline"]/@href')
+            video_src = content.xpath('.//video/@src')
             img_pattern = './/div[@class="sc-bdnxRM fzUdiI"]'
             image_url_list = []
             if content.xpath(img_pattern):
@@ -47,7 +78,8 @@ class JiKe:
                         img_src = image.lstrip('url("').rstrip('")')
                         image_url_list.append(img_src)
 
-            item = {'user': user, 'create_time': create_time, 'text': text, 'image_urls': image_url_list}
+            item = {'user': user, 'create_time': create_time, 'text': text, 'image_urls': image_url_list, 'href': href,
+                    'video_src': video_src}
             items.append(item)
         return items
 
@@ -55,18 +87,28 @@ class JiKe:
         try:
 
             data_Frame = pd.DataFrame(items)
-            data_Frame.to_csv('./jike_user.csv', index=False, sep=';')
+            # data_Frame.to_csv('./jike_user.csv', index=False, sep=';')
+            data_Frame.to_excel('./jike_user.xlsx', sheet_name='Sheet1')
             return True
         except Exception as e:
             print(e)
             return False
 
+    def analyse_items(self, items):
+        item = items
+        pass
+
 
 if __name__ == '__main__':
-    jike = JiKe('https://web.okjike.com/u/5f88ffbd-9595-4de0-9cf5-b3402bf43a0e')
-    page = jike.get_page()
+    # jike = JiKe('https://web.okjike.com/u/5f88ffbd-9595-4de0-9cf5-b3402bf43a0e')
+    jike = JiKe('https://web.okjike.com/me/collection')
+
+    page = jike.get_page(load_login_cookies=True, save_login_cookies=False)
+    # jike.get_login_cookies()
     items = jike.get_items(page)
     jike.save_items(items)
+    # items = pd.read_csv('./jike_user.csv', sep=';')
+    # jike.analyse_items(items)
     # for item in items:
     #     for key, value in item.items():
     #         print(key, value)
