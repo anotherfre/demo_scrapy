@@ -1,10 +1,11 @@
 from selenium import webdriver
 from lxml import etree
+import pandas as pd
 
 
 class JiKe:
     def __init__(self, url):
-        self.browser = webdriver.Edge()
+        self.browser = webdriver.Chrome()
         self.url = url
 
     def get_page(self):
@@ -50,12 +51,22 @@ class JiKe:
             items.append(item)
         return items
 
+    def save_items(self, items):
+        try:
+
+            data_Frame = pd.DataFrame(items)
+            data_Frame.to_csv('./jike_user.csv', index=False, sep=';')
+            return True
+        except Exception as e:
+            print(e)
+            return False
+
 
 if __name__ == '__main__':
     jike = JiKe('https://web.okjike.com/u/5f88ffbd-9595-4de0-9cf5-b3402bf43a0e')
     page = jike.get_page()
     items = jike.get_items(page)
-
+    jike.save_items(items)
     # for item in items:
     #     for key, value in item.items():
     #         print(key, value)
