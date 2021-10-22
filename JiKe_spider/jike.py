@@ -16,7 +16,7 @@ class JiKe:
         page_etree = etree.HTML(page)
         content_list = page_etree.xpath('//div[@class="flex flex-col flex-auto pt-2 w-full animate-show min-w-0"]')
         items = []
-        for content in content_list:
+        for index, content in enumerate(content_list):
             user = content.xpath('.//a[@class="sc-bdnxRM fEvjQr"]/text()')[0]
             create_time = content.xpath('.//time/@datetime')[0]
             text = content.xpath(
@@ -33,13 +33,14 @@ class JiKe:
                     """
                     js = """
                         let src_list = [];
-                        let image_list = document.getElementsByClassName("sc-bdnxRM MessagePictureGrid__Cell-sc-pal5rf-3");
+                        let temp_div = document.querySelectorAll("div.flex.flex-col.flex-auto.pt-2.w-full.animate-show.min-w-0")[(%s)];
+                        let image_list = temp_div.getElementsByClassName("sc-bdnxRM MessagePictureGrid__Cell-sc-pal5rf-3");
                         for(let image of image_list){
                             let bg_image = window.getComputedStyle(image).backgroundImage;
                             src_list.push(bg_image);
                         }
                         return src_list;
-                    """
+                    """ % (index,)
                     images = self.browser.execute_script(js)
                     for image in images:
                         img_src = image.lstrip('url("').rstrip('")')
@@ -55,5 +56,7 @@ if __name__ == '__main__':
     page = jike.get_page()
     items = jike.get_items(page)
 
-    for item in items:
-        print(item)
+    # for item in items:
+    #     for key, value in item.items():
+    #         print(key, value)
+    #     print("\n")
