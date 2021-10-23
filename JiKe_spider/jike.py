@@ -2,6 +2,7 @@ from selenium import webdriver
 from lxml import etree
 import pandas as pd
 import json
+import time
 
 
 class JiKe:
@@ -13,12 +14,30 @@ class JiKe:
         self.browser = webdriver.Chrome()
         self.url = url
 
-    def get_page(self, save_login_cookies=False, load_login_cookies=False):
+    def get_page(self, save_login_cookies=False, load_login_cookies=False, scroll=False):
+        """
+        save_login_cookies: 保存登录cookies
+        load_login_cookies: 加载登录cookies
+        scroll:控制页面滚动
+        """
         self.browser.get(self.url)
         if save_login_cookies:
             self.save_login_cookies()
         if load_login_cookies:
             self.load_login_cookies()
+        if scroll:
+            # 滑动至底部
+            client_hg = scroll_top = 0
+            scroll_hg = 1
+            while round(scroll_top) + round(client_hg) < round(int(scroll_hg)):
+                self.browser.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+                time.sleep(1.5)
+                js = 'let scroll_top = document.documentElement.scrollTop; return scroll_top;'
+                scroll_top = self.browser.execute_script(js)
+                js = 'let client_hg = document.documentElement.clientHeight; return client_hg;'
+                client_hg = self.browser.execute_script(js)
+                js = 'let scroll_hg = document.body.scrollHeight; return scroll_hg;'
+                scroll_hg = self.browser.execute_script(js)
         page = self.browser.page_source
         return page
 
@@ -43,6 +62,9 @@ class JiKe:
         return True
 
     def get_items(self, page):
+        """
+        xpath 和 JavaScript获取数据，清洗返回item
+        """
         page_etree = etree.HTML(page)
         content_list = page_etree.xpath('//div[@class="flex flex-col flex-auto pt-2 w-full animate-show min-w-0"]')
         items = []
@@ -103,7 +125,7 @@ if __name__ == '__main__':
     # jike = JiKe('https://web.okjike.com/u/5f88ffbd-9595-4de0-9cf5-b3402bf43a0e')
     jike = JiKe('https://web.okjike.com/me/collection')
 
-    page = jike.get_page(load_login_cookies=True, save_login_cookies=False)
+    page = jike.get_page(load_login_cookies=False, save_login_cookies=True, scroll=True)
     # jike.get_login_cookies()
     items = jike.get_items(page)
     jike.save_items(items)
