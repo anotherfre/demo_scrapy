@@ -43,12 +43,18 @@ class JiKe:
         return page
 
     def save_login_cookies(self):
+        """
+        保存登录cookies
+        """
         cookies = self.browser.get_cookies()
         with open('./cookies.json', 'w') as f:
             f.write(json.dumps(cookies))
         return True
 
     def load_login_cookies(self):
+        """
+        读取本地cookies文件加载cookies模拟登录
+        """
         with open('./cookies.json', 'r')as f:
             cookies = json.loads(f.read())
 
@@ -108,6 +114,9 @@ class JiKe:
         return items
 
     def save_items(self, items):
+        """
+        保存为csv or excel文件
+        """
         try:
 
             data_Frame = pd.DataFrame(items)
@@ -123,7 +132,6 @@ class JiKe:
 
 
 if __name__ == '__main__':
-    # jike = JiKe('https://web.okjike.com/u/5f88ffbd-9595-4de0-9cf5-b3402bf43a0e')
     jike = JiKe('https://web.okjike.com/me/collection')
 
     page = jike.get_page(load_login_cookies=True, save_login_cookies=False, scroll=True)
