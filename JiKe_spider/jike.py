@@ -31,7 +31,8 @@ class JiKe:
             scroll_hg = 1
             while round(scroll_top) + round(client_hg) < round(int(scroll_hg)):
                 self.browser.execute_script("window.scrollTo(0,document.body.scrollHeight);")
-                time.sleep(1.5)
+                # 根据网络状态适当修改滑动加载时间
+                time.sleep(6)
                 js = 'let scroll_top = document.documentElement.scrollTop; return scroll_top;'
                 scroll_top = self.browser.execute_script(js)
                 js = 'let client_hg = document.documentElement.clientHeight; return client_hg;'
@@ -74,7 +75,7 @@ class JiKe:
             text = content.xpath(
                 './/div[contains(@class,"break-words content_truncate__1z0HR")]/text()')
             href = content.xpath('.//a[@class="text-primary no-underline"]/@href')
-            video_src = content.xpath('.//video/@src')
+            # video_src = content.xpath('.//video/@src')
             img_pattern = './/div[@class="sc-bdnxRM fzUdiI"]'
             image_url_list = []
             if content.xpath(img_pattern):
@@ -100,8 +101,9 @@ class JiKe:
                         img_src = image.lstrip('url("').rstrip('")')
                         image_url_list.append(img_src)
 
-            item = {'user': user, 'create_time': create_time, 'text': text, 'image_urls': image_url_list, 'href': href,
-                    'video_src': video_src}
+            item = {'user': user, 'create_time': create_time, 'text': text[0] if text else '',
+                    'image_urls': image_url_list if image_url_list else '',
+                    'href': href if href else ''}
             items.append(item)
         return items
 
@@ -117,7 +119,6 @@ class JiKe:
             return False
 
     def analyse_items(self, items):
-        item = items
         pass
 
 
@@ -125,7 +126,7 @@ if __name__ == '__main__':
     # jike = JiKe('https://web.okjike.com/u/5f88ffbd-9595-4de0-9cf5-b3402bf43a0e')
     jike = JiKe('https://web.okjike.com/me/collection')
 
-    page = jike.get_page(load_login_cookies=False, save_login_cookies=True, scroll=True)
+    page = jike.get_page(load_login_cookies=True, save_login_cookies=False, scroll=True)
     # jike.get_login_cookies()
     items = jike.get_items(page)
     jike.save_items(items)
