@@ -3,6 +3,10 @@ from lxml import etree
 import pandas as pd
 import json
 import time
+import os
+import random
+import string
+import requests
 
 
 class JiKe:
@@ -13,6 +17,7 @@ class JiKe:
         # self.browser = webdriver.Chrome(chrome_options=chrome_opt)
         self.browser = webdriver.Chrome()
         self.url = url
+        self.image_list = []
 
     def get_page(self, save_login_cookies=False, load_login_cookies=False, scroll=False):
         """
@@ -77,7 +82,7 @@ class JiKe:
         items = []
         for index, content in enumerate(content_list):
             user = content.xpath('.//a[@class="sc-bdnxRM fEvjQr"]/text()')[0]
-            create_time = content.xpath('.//time/@datetime')[0]
+            create_time = content.xpath('.//time/@datetime')[0] if content.xpath('.//time/@datetime') else ''
             text = content.xpath(
                 './/div[contains(@class,"break-words content_truncate__1z0HR")]/text()')
             href = content.xpath('.//a[@class="text-primary no-underline"]/@href')
@@ -87,7 +92,8 @@ class JiKe:
             if content.xpath(img_pattern):
                 img_src = content.xpath(img_pattern + '//img/@src')
                 if img_src:
-                    image_url_list.append(img_src)
+                    image_url_list.append(img_src[0])
+                    self.image_list.append(img_src[0])
                 else:
                     """
                     JavaScript 
@@ -106,6 +112,7 @@ class JiKe:
                     for image in images:
                         img_src = image.lstrip('url("').rstrip('")')
                         image_url_list.append(img_src)
+                        self.image_list.append(img_src)
 
             item = {'user': user, 'create_time': create_time, 'text': text[0] if text else '',
                     'image_urls': image_url_list if image_url_list else '',
@@ -121,7 +128,7 @@ class JiKe:
 
             data_Frame = pd.DataFrame(items)
             # data_Frame.to_csv('./jike_user.csv', index=False, sep=';')
-            data_Frame.to_excel('./jike_user.xlsx', sheet_name='Sheet1')
+            data_Frame.to_excel('./read_hot.xlsx', sheet_name='Sheet1')
             return True
         except Exception as e:
             print(e)
@@ -130,14 +137,26 @@ class JiKe:
     def analyse_items(self, items):
         pass
 
+    def download_images(self):
+        if not os.path.exists('./images'):
+            os.mkdir('./images')
+        for image in self.image_list:
+            resp = requests.get(image)
+            if resp.status_code == 200:
+                file = ''.join(random.sample(string.ascii_letters + string.digits, 8))
+                path = './images/{file}.jpg'.format(file=file)
+
+                with open(path, 'wb') as f:
+                    f.write(resp.content)
+
 
 if __name__ == '__main__':
-    jike = JiKe('https://web.okjike.com/me/collection')
-
-    page = jike.get_page(load_login_cookies=True, save_login_cookies=False, scroll=True)
+    jike = JiKe('https://web.okjike.com/topic/5b7d2e3aaa31960017c5a206/hot')
+    page = jike.get_page(load_login_cookies=False, save_login_cookies=False, scroll=True)
     # jike.get_login_cookies()
     items = jike.get_items(page)
     jike.save_items(items)
+    jike.download_images()
     # items = pd.read_csv('./jike_user.csv', sep=';')
     # jike.analyse_items(items)
     # for item in items:
