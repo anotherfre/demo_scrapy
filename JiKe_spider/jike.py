@@ -82,10 +82,13 @@ class JiKe:
         items = []
         for index, content in enumerate(content_list):
             user = content.xpath('.//a[@class="sc-bdnxRM fEvjQr"]/text()')[0]
-            create_time = content.xpath('.//time/@datetime')[0] if content.xpath('.//time/@datetime') else ''
+            create_time = content.xpath('.//time/@datetime')
             text = content.xpath(
                 './/div[contains(@class,"break-words content_truncate__1z0HR")]/text()')
             href = content.xpath('.//a[@class="text-primary no-underline"]/@href')
+            like = content.xpath('.//span[@class="Like___StyledSpan-sc-8xi69i-1 gURQoB"]/text()')
+            area = content.xpath(
+                './/a[@class="sc-bdnxRM cYiXfS MessageFooter__TopicContainer-sc-3lstkp-0 dYbgtz"]/text()')
             # video_src = content.xpath('.//video/@src')
             img_pattern = './/div[@class="sc-bdnxRM fzUdiI"]'
             image_url_list = []
@@ -114,9 +117,13 @@ class JiKe:
                         image_url_list.append(img_src)
                         self.image_list.append(img_src)
 
-            item = {'user': user, 'create_time': create_time, 'text': text[0] if text else '',
+            item = {'user': user,
+                    'create_time': create_time[0] if create_time else '',
+                    'text': text[0] if text else '',
                     'image_urls': image_url_list if image_url_list else '',
-                    'href': href if href else ''}
+                    'href': href if href else '',
+                    'like': int(like[0]) if like else 0,
+                    'area': area[0] if area else ''}
             items.append(item)
         return items
 
@@ -128,7 +135,7 @@ class JiKe:
 
             data_Frame = pd.DataFrame(items)
             # data_Frame.to_csv('./jike_user.csv', index=False, sep=';')
-            data_Frame.to_excel('./read_hot.xlsx', sheet_name='Sheet1')
+            data_Frame.to_excel('./xxj.xlsx')
             return True
         except Exception as e:
             print(e)
@@ -137,26 +144,27 @@ class JiKe:
     def analyse_items(self, items):
         pass
 
-    def download_images(self):
-        if not os.path.exists('./images'):
-            os.mkdir('./images')
+    def download_images(self, path='./images'):
+        if not os.path.exists(path):
+            os.mkdir(path)
         for image in self.image_list:
             resp = requests.get(image)
             if resp.status_code == 200:
                 file = ''.join(random.sample(string.ascii_letters + string.digits, 8))
-                path = './images/{file}.jpg'.format(file=file)
+                path = '{path}/{file}.jpg'.format(file=file, path=path)
 
                 with open(path, 'wb') as f:
                     f.write(resp.content)
 
 
 if __name__ == '__main__':
-    jike = JiKe('https://web.okjike.com/topic/5b7d2e3aaa31960017c5a206/hot')
+    # jike = JiKe('https://web.okjike.com/topic/5b7d2e3aaa31960017c5a206/hot')
+    jike = JiKe('https://web.okjike.com/u/ABE6BBAD-0A19-48C3-981A-917139A45BC4')
     page = jike.get_page(load_login_cookies=False, save_login_cookies=False, scroll=True)
     # jike.get_login_cookies()
     items = jike.get_items(page)
     jike.save_items(items)
-    jike.download_images()
+    # jike.download_images()
     # items = pd.read_csv('./jike_user.csv', sep=';')
     # jike.analyse_items(items)
     # for item in items:
