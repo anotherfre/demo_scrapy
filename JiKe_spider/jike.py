@@ -7,6 +7,7 @@ import os
 import random
 import string
 import requests
+import matplotlib.pyplot as plt
 
 
 class JiKe:
@@ -135,13 +136,28 @@ class JiKe:
 
             data_Frame = pd.DataFrame(items)
             # data_Frame.to_csv('./jike_user.csv', index=False, sep=';')
-            data_Frame.to_excel('./xxj.xlsx')
+            data_Frame.to_excel('./hhpt.xlsx')
             return True
         except Exception as e:
             print(e)
             return False
 
-    def analyse_items(self, items):
+    def analyse_items(self, data_path, compare_data_path=None):
+        """
+        分析item
+        """
+        data = pd.read_excel(data_path)
+        # print(data.head())
+        create_time_arr = data['create_time'].to_numpy()
+        like_arr = data['like'].to_numpy()
+        if compare_data_path:
+            compare_data = pd.read_excel(compare_data_path)
+            c_create_time_arr = compare_data['create_time'].to_numpy()
+            c_like_arr = compare_data['like'].to_numpy()
+            plt.plot(c_create_time_arr, c_like_arr, color='green', linestyle='-.')
+        plt.plot(create_time_arr, like_arr, color='red', linestyle='--')
+        plt.xticks(rotation=270)
+        plt.show()
         pass
 
     def download_images(self, path='./images'):
@@ -159,15 +175,12 @@ class JiKe:
 
 if __name__ == '__main__':
     # jike = JiKe('https://web.okjike.com/topic/5b7d2e3aaa31960017c5a206/hot')
-    jike = JiKe('https://web.okjike.com/u/ABE6BBAD-0A19-48C3-981A-917139A45BC4')
-    page = jike.get_page(load_login_cookies=False, save_login_cookies=False, scroll=True)
+    jike = JiKe('https://web.okjike.com/u/051A9E99-6CB8-4283-AD24-79EE8265D17B')
+    # page = jike.get_page(load_login_cookies=False, save_login_cookies=False, scroll=True)
     # jike.get_login_cookies()
-    items = jike.get_items(page)
-    jike.save_items(items)
+    # items = jike.get_items(page)
+    # jike.save_items(items)
     # jike.download_images()
-    # items = pd.read_csv('./jike_user.csv', sep=';')
-    # jike.analyse_items(items)
-    # for item in items:
-    #     for key, value in item.items():
-    #         print(key, value)
-    #     print("\n")
+    path = './hhpt.xlsx'
+    compare_path = './xxj.xlsx'
+    jike.analyse_items(path, compare_path)
