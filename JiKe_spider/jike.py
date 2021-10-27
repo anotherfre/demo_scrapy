@@ -16,7 +16,7 @@ class JiKe:
         # chrome_opt = webdriver.ChromeOptions()
         # chrome_opt.add_argument("--proxy-server=http://171.92.21.43:9000")
         # self.browser = webdriver.Chrome(chrome_options=chrome_opt)
-        self.browser = webdriver.Chrome()
+        self.browser = None
         self.url = url
         self.image_list = []
 
@@ -26,6 +26,7 @@ class JiKe:
         load_login_cookies: 加载登录cookies
         scroll:控制页面滚动
         """
+        self.browser = webdriver.Chrome()
         self.browser.get(self.url)
         if save_login_cookies:
             self.save_login_cookies()
@@ -154,9 +155,17 @@ class JiKe:
             compare_data = pd.read_excel(compare_data_path)
             c_create_time_arr = compare_data['create_time'].to_numpy()
             c_like_arr = compare_data['like'].to_numpy()
-            plt.plot(c_create_time_arr, c_like_arr, color='green', linestyle='-.')
-        plt.plot(create_time_arr, like_arr, color='red', linestyle='--')
+            plt.plot(c_create_time_arr, c_like_arr, color='green', linestyle='-.', label=compare_data.iloc[0]['user'])
+        plt.plot(create_time_arr, like_arr, color='red', linestyle='--', label=data.iloc[0]['user'])
         plt.xticks(rotation=270)
+        plt.title('date_like')
+        plt.xlabel('date')
+        plt.ylabel('like')
+        plt.legend(loc='upper left')
+        # plt.rcParams['figure.figsize'] = (4, 3)
+        # 设置中文字体显示
+        plt.rcParams['font.sans-serif'] = ['SimHei']
+        plt.rcParams['axes.unicode_minus'] = False
         plt.show()
         pass
 
