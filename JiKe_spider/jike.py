@@ -143,30 +143,50 @@ class JiKe:
             print(e)
             return False
 
-    def analyse_items(self, data_path, compare_data_path=None):
+    def analyse_items(self, data_path, compare_data_path=None, data_subplots=False):
         """
         分析item
+        data_path: 读取文件地址
+        compare_data_path: 对比文件地址
+        data_subplots: 生成子图模式
         """
         data = pd.read_excel(data_path)
         # print(data.head())
+        print(data.describe())
         create_time_arr = data['create_time'].to_numpy()
         like_arr = data['like'].to_numpy()
-        if compare_data_path:
-            compare_data = pd.read_excel(compare_data_path)
-            c_create_time_arr = compare_data['create_time'].to_numpy()
-            c_like_arr = compare_data['like'].to_numpy()
-            plt.plot(c_create_time_arr, c_like_arr, color='green', linestyle='-.', label=compare_data.iloc[0]['user'])
-        plt.plot(create_time_arr, like_arr, color='red', linestyle='--', label=data.iloc[0]['user'])
-        plt.xticks(rotation=270)
-        plt.title('date_like')
-        plt.xlabel('date')
-        plt.ylabel('like')
-        plt.legend(loc='upper left')
-        # plt.rcParams['figure.figsize'] = (4, 3)
+        area_arr = data['area'].to_list()
+
         # 设置中文字体显示
         plt.rcParams['font.sans-serif'] = ['SimHei']
         plt.rcParams['axes.unicode_minus'] = False
-        plt.show()
+        if not data_subplots:
+            if compare_data_path:
+                compare_data = pd.read_excel(compare_data_path)
+                c_create_time_arr = compare_data['create_time'].to_numpy()
+                c_like_arr = compare_data['like'].to_numpy()
+                plt.plot(c_create_time_arr, c_like_arr, color='green', linestyle='-.',
+                         label=compare_data.iloc[0]['user'])
+            plt.plot(create_time_arr, like_arr, color='red', linestyle='--', label=data.iloc[0]['user'])
+            plt.xticks(rotation=270)
+            plt.title('date_like')
+            plt.xlabel('date')
+            plt.ylabel('like')
+            plt.legend(loc='upper left')
+            # plt.rcParams['figure.figsize'] = (4, 3)
+
+            plt.show()
+        else:
+            fig, axes = plt.subplots(nrows=1, ncols=2)
+            axe_1, axe_2 = axes.flatten()
+            axe_1.plot(create_time_arr, like_arr, label=data.iloc[0]['user'])
+
+            labels = area_arr
+            explode_list = []
+            for i in range(len(area_arr)):
+                explode_list.append(0.02)
+            axe_2.pie(like_arr, labels=labels, explode=explode_list)
+            plt.show()
         pass
 
     def download_images(self, path='./images'):
@@ -192,4 +212,4 @@ if __name__ == '__main__':
     # jike.download_images()
     path = './hhpt.xlsx'
     compare_path = './xxj.xlsx'
-    jike.analyse_items(path, compare_path)
+    jike.analyse_items(path, compare_path, data_subplots=True)
