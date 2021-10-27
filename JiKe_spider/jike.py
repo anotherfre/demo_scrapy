@@ -160,6 +160,7 @@ class JiKe:
         # 设置中文字体显示
         plt.rcParams['font.sans-serif'] = ['SimHei']
         plt.rcParams['axes.unicode_minus'] = False
+
         if not data_subplots:
             if compare_data_path:
                 compare_data = pd.read_excel(compare_data_path)
@@ -173,19 +174,37 @@ class JiKe:
             plt.xlabel('date')
             plt.ylabel('like')
             plt.legend(loc='upper left')
-            # plt.rcParams['figure.figsize'] = (4, 3)
 
             plt.show()
         else:
-            fig, axes = plt.subplots(nrows=1, ncols=2)
-            axe_1, axe_2 = axes.flatten()
-            axe_1.plot(create_time_arr, like_arr, label=data.iloc[0]['user'])
 
+            # fig, axes = plt.subplots(nrows=2, ncols=2)
+            # axe_1, axe_2, axe_3, axe_4 = axes.flatten()
+            axe_1 = plt.subplot(221)
+            axe_1.plot(create_time_arr, like_arr, label=data.iloc[0]['user'])
+            plt.xticks(rotation=270)
+            plt.title('date_like')
+            plt.xlabel('date')
+            plt.ylabel('like')
+            plt.legend(loc='upper left')
+
+            axe_2 = plt.subplot(222)
             labels = area_arr
             explode_list = []
             for i in range(len(area_arr)):
-                explode_list.append(0.02)
-            axe_2.pie(like_arr, labels=labels, explode=explode_list)
+                explode_list.append(0.05)
+            axe_2.pie(like_arr, labels=labels, explode=explode_list, autopct='%.2f%%')
+
+            axe_3 = plt.subplot(223)
+            group_dict = {}
+            for idx in range(data.shape[0]):
+                if data.iloc[idx]['area'] not in group_dict:
+                    group_dict[data.iloc[idx]['area']] = data.iloc[idx]['like']
+                else:
+                    group_dict[data.iloc[idx]['area']] += data.iloc[idx]['like']
+            axe_3.pie(group_dict.values(), labels=group_dict.keys(), autopct='%.2f%%')
+            # 保存图片
+            # plt.savefig('./analyse.jpg')
             plt.show()
         pass
 
