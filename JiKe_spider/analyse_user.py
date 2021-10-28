@@ -5,7 +5,7 @@ import pandas as pd
 class AnalyseUser:
     def __init__(self, data_path, compare_data_path=None):
         self.data = pd.read_excel(data_path)
-        self.compare_data = pd.read_excel(compare_data_path) if compare_data_path else {}
+        self.compare_data = pd.read_excel(compare_data_path) if compare_data_path else pd.DataFrame()
 
     def draw_plot(self):
         create_time_arr = self.data['create_time'].to_numpy()
@@ -14,7 +14,7 @@ class AnalyseUser:
         # 设置中文字体显示
         plt.rcParams['font.sans-serif'] = ['SimHei']
         plt.rcParams['axes.unicode_minus'] = False
-        if self.compare_data:
+        if self.compare_data is not None:
             c_create_time_arr = self.compare_data['create_time'].to_numpy()
             c_like_arr = self.compare_data['like'].to_numpy()
             plt.plot(c_create_time_arr, c_like_arr, color='green', linestyle='-.',
@@ -25,6 +25,7 @@ class AnalyseUser:
         plt.xlabel('date')
         plt.ylabel('like')
         plt.legend(loc='upper left')
+        plt.savefig('./user_hhpt.jpg')
         plt.show()
 
     def draw_subplot(self):
@@ -58,9 +59,11 @@ class AnalyseUser:
                 group_dict[self.data.iloc[idx]['area']] += self.data.iloc[idx]['like']
         axe_3.pie(group_dict.values(), labels=group_dict.keys(), autopct='%.2f%%')
         # 保存图片
-        # plt.savefig('./analyse.jpg')
+        plt.savefig('./analyse.jpg')
         plt.show()
 
 
 if __name__ == '__main__':
-    pass
+    anal_user = AnalyseUser('./hhpt.xlsx', './xxj.xlsx')
+    anal_user.draw_plot()
+    # anal_user.draw_subplot()

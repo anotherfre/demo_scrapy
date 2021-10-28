@@ -1,5 +1,12 @@
 # 爬虫合集
 ##更新
+### 2021-10-28 即刻添加用户分析
+- [analyse_user:分析即刻用户](https://github.com/anotherfre/demo_scrapy/blob/master/JiKe_spider/jike.py)
+    - 生成子图折线图/饼图
+    - 单用户折线图/两个用户折线对比
+***
+![analyse](https://github.com/anotherfre/demo_scrapy/blob/master/ReadmeImage/analyse.jpg)
+![user](https://github.com/anotherfre/demo_scrapy/blob/master/ReadmeImage/user_hhpt.jpg)
 ### 2021-10-24 即刻添加保存图片
 - [JiKe_spider:即刻app web端爬虫](https://github.com/anotherfre/demo_scrapy/tree/master/JiKe_spider)
     - 添加可保存图片（用户/圈子/收藏）
