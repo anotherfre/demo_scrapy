@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
 import pandas as pd
+import jieba
+from wordcloud import WordCloud
 
 
 class AnalyseUser:
@@ -7,7 +9,18 @@ class AnalyseUser:
         self.data = pd.read_excel(data_path)
         self.compare_data = pd.read_excel(compare_data_path) if compare_data_path else pd.DataFrame()
 
+    def sort_analyse(self, **kwargs):
+        """
+        key:排序字段
+        value：排序规则，False降序，true升序
+        """
+        sort_data = self.data.sort_values(list(kwargs.keys()), ascending=list(kwargs.values()))
+        return sort_data
+
     def draw_plot(self):
+        """
+        生成折线图
+        """
         create_time_arr = self.data['create_time'].to_numpy()
         like_arr = self.data['like'].to_numpy()
 
@@ -29,7 +42,9 @@ class AnalyseUser:
         plt.show()
 
     def draw_subplot(self):
-
+        """
+        生成子图
+        """
         create_time_arr = self.data['create_time'].to_numpy()
         like_arr = self.data['like'].to_numpy()
         area_arr = self.data['area'].to_list()
@@ -62,8 +77,35 @@ class AnalyseUser:
         plt.savefig('./analyse.jpg')
         plt.show()
 
+    def draw_word_cloud(self):
+        """
+        词云图
+        """
+        word = self.data['area']
+        word = ' '.join(list(word))
+        jb_word = jieba.cut(word, cut_all=False)
+        wc = WordCloud(
+            width=400,
+            height=400,
+            max_words=100,
+            font_path='simhei.ttf',
+            max_font_size=50,
+            min_font_size=10,
+            random_state=50,
+            background_color='white'
+        )
+        image = wc.generate(''.join(jb_word))
+        plt.imshow(image)
+        plt.axis('off')
+        # plt.show()
+        plt.savefig('./word_cloud.jpg')
+
 
 if __name__ == '__main__':
     anal_user = AnalyseUser('./hhpt.xlsx', './xxj.xlsx')
-    anal_user.draw_plot()
+    # anal_user.draw_plot()
     # anal_user.draw_subplot()
+    #
+    # sort_result = anal_user.sort_analyse(like=False)
+    # print(sort_result.head(10))
+    # anal_user.draw_word_cloud()
